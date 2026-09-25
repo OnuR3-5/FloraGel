@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="tr" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FloraGel - Sulamayı Azalt, Verimi Artır</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    },
+                    colors: {
+                        forest: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                            800: '#166534',
+                            900: '#14532d',
+                        },
+                        cyan: {
+                            500: '#06b6d4',
+                            600: '#0891b2',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #F8FAFC; }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.7);
+            box-shadow: 0 20px 40px -15px rgba(15, 23, 42, 0.07);
+        }
+        .glass-btn {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.9);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .glass-btn:hover, .glass-btn.active {
+            background: rgba(16, 185, 129, 0.15);
+            border-color: #10B981;
+            color: #047857;
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.3);
+        }
+        canvas { touch-action: none; }
+    </style>
+</head>
+<body class="text-slate-800 antialiased selection:bg-emerald-500 selection:text-white">
+
+    <!-- Arka Plan Parçacıkları -->
+    <canvas id="particleCanvas" class="fixed inset-0 pointer-events-none z-0 opacity-40"></canvas>
+
+    <!-- STICKY NAVIGATION -->
+    <header class="fixed top-0 left-0 right-0 z-50 px-4 sm:px-8 py-4 transition-all duration-300">
+        <nav class="max-w-7xl mx-auto glass-panel rounded-2xl px-6 py-3 flex items-center justify-between">
+            <a href="#" class="flex items-center gap-3 group">
+                <img src="floragellogo.jpeg" alt="FloraGel Logo" class="h-10 w-auto object-contain group-hover:scale-105 transition-transform">
+            </a>
+
+            <div class="hidden md:flex items-center gap-8 font-semibold text-sm text-slate-600">
+                <a href="#hero" class="hover:text-emerald-600 transition-colors">Ana Sayfa</a>
+                <a href="#explorer" class="hover:text-emerald-600 transition-colors">3D Yapı</a>
+                <a href="#calculator" class="hover:text-emerald-600 transition-colors">Saha Simülatörü</a>
+                <a href="#about" class="hover:text-emerald-600 transition-colors">Hakkımızda</a>
+                <a href="#supporters" class="hover:text-emerald-600 transition-colors">Destekçilerimiz</a>
+                <a href="#faq" class="hover:text-emerald-600 transition-colors">SSS</a>
+                <a href="#contact" class="hover:text-emerald-600 transition-colors">İletişim</a>
+            </div>
+
+            <a href="#contact" class="hidden sm:flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-600 text-white font-medium text-sm hover:bg-emerald-700 shadow-md transition-all hover:shadow-lg hover:shadow-emerald-600/20 active:scale-95">
+                <span>Numune / Bilgi Al</span>
+                <i data-lucide="arrow-right" class="w-4 h-4"></i>
+            </a>
+        </nav>
+    </header>
+
+    <main class="relative z-10 pt-28">
+
+        <!-- HERO SECTION -->
+        <section id="hero" class="max-w-7xl mx-auto px-4 sm:px-8 py-12 lg:py-16 flex flex-col items-center text-center">
+            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-panel text-emerald-800 font-semibold text-xs sm:text-sm mb-6 border border-emerald-500/30 shadow-sm">
+                <i data-lucide="award" class="w-4 h-4 text-emerald-600"></i>
+                <span>TEKNOFEST 2026 Tarım Teknolojileri Finalisti</span>
+            </div>
+
+            <h1 class="text-4xl sm:text-6xl lg:text-7xl font-black text-slate-900 tracking-tight leading-[1.15] max-w-5xl mb-6">
+                Sulamayı Optimize Et, Toprağı Koru: <br class="hidden sm:inline"/>
+                <span class="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 bg-clip-text text-transparent">Doğal Biyo-Nanokompozit Hidrojel</span>
+            </h1>
+
+            <p class="text-slate-600 text-base sm:text-xl max-w-3xl font-normal leading-relaxed mb-8">
+                Tarımsal sulama suyunun önemli bir kısmı derine sızma ve buharlaşma ile kaybolur. FloraGel, 4 katmanlı biyopolimer yapısıyla suyu ve besin maddelerini kök bölgesinde tutarak kontrollü salınım sağlar.
+            </p>
+
+            <div class="flex flex-wrap justify-center gap-4 mb-10">
+                <div class="flex items-center gap-2 px-4 py-2 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 font-bold text-sm">
+                    <i data-lucide="droplet" class="w-4 h-4 text-cyan-600"></i> Saha Şartlarında %30 - %45 Su Tasarrufu
+                </div>
+                <div class="flex items-center gap-2 px-4 py-2 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 font-bold text-sm">
+                    <i data-lucide="sprout" class="w-4 h-4 text-emerald-600"></i> %20 - %30 Gübre Yıkanma Önleme
+                </div>
+            </div>
+
+            <div class="flex flex-wrap justify-center gap-4">
+                <a href="#explorer" class="px-8 py-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-base shadow-xl shadow-emerald-600/25 hover:shadow-emerald-600/40 transition-all flex items-center gap-3">
+                    <i data-lucide="box" class="w-5 h-5"></i>
+                    <span>4 Katmanlı Yapıyı İncele</span>
+                </a>
+                <a href="#calculator" class="px-8 py-4 rounded-xl glass-btn text-slate-800 font-bold text-base flex items-center gap-3">
+                    <i data-lucide="calculator" class="w-5 h-5 text-emerald-600"></i>
+                    <span>Saha Simülatörü</span>
+                </a>
+            </div>
+        </section>
+
+        <!-- 3D PRODUCT EXPLORER -->
+        <section id="explorer" class="max-w-7xl mx-auto px-4 sm:px-8 py-12">
+            <div class="text-center mb-8">
+                <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900">Hidrojel Bombası Nedir?</h2>
+                <p class="text-slate-600 mt-2">Sıradan bir su tutucu değil, dört katmanlı hiyerarşik bir bio-nanokompozit.</p>
+            </div>
+
+            <div class="relative w-full rounded-3xl glass-panel overflow-hidden border border-white/60 min-h-[650px] flex flex-col lg:flex-row shadow-xl">
+                
+                <!-- 3D Canvas Alanı -->
+                <div id="canvas-container" class="w-full lg:w-2/3 h-[450px] lg:h-[650px] relative cursor-grab active:cursor-grabbing">
+                    <div class="absolute top-4 left-4 right-4 z-20 flex flex-wrap gap-2 justify-center lg:justify-start">
+                        <button onclick="selectLayer('all')" id="btn-all" class="glass-btn active px-4 py-2 rounded-xl text-xs sm:text-sm font-bold">Tüm Katmanlar</button>
+                        <button onclick="selectLayer(1)" id="btn-1" class="glass-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-bold">1. Tanik asit – demir filmi</button>
+                        <button onclick="selectLayer(2)" id="btn-2" class="glass-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-bold">2. Nanokil katmanı</button>
+                        <button onclick="selectLayer(3)" id="btn-3" class="glass-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-bold">3. PEC kabuğu</button>
+                        <button onclick="selectLayer(4)" id="btn-4" class="glass-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-bold">4. Çekirdek</button>
+                    </div>
+
+                    <div id="three-canvas" class="w-full h-full"></div>
+                </div>
+
+                <!-- Sağ Bilgi Paneli -->
+                <div class="w-full lg:w-1/3 p-6 lg:p-8 flex flex-col justify-center border-t lg:border-t-0 lg:border-l border-slate-200/60 bg-white/50 backdrop-blur-md">
+                    <div id="layer-card" class="transition-all duration-300">
+                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-emerald-100 text-emerald-800 font-bold text-xs mb-3" id="layer-badge">
+                            Tüm Yapı
+                        </div>
+                        <h3 class="text-2xl font-extrabold text-slate-900 mb-4" id="layer-title">Hidrojel Bombası</h3>
+                        <p class="text-slate-600 text-sm leading-relaxed mb-6" id="layer-desc">
+                            Dört katmanlı hiyerarşik bio-nanokompozit yapı. Katmanlar sırasıyla koruma, salınım hızı dengeleme, mekanik dayanım ve yüksek su/besin depolama görevlerini üstlenir.
+                        </p>
+                        
+                        <div class="space-y-3" id="layer-stats">
+                            <div class="flex justify-between items-center p-3 rounded-xl bg-white/70 border border-slate-100">
+                                <span class="text-xs text-slate-500 font-semibold">Ort. Su Tasarrufu</span>
+                                <span class="text-sm font-bold text-emerald-700">%30 - %45</span>
+                            </div>
+                            <div class="flex justify-between items-center p-3 rounded-xl bg-white/70 border border-slate-100">
+                                <span class="text-xs text-slate-500 font-semibold">Gübre Yıkanma Önleme</span>
+                                <span class="text-sm font-bold text-emerald-700">%20 - %30</span>
+                            </div>
+                            <div class="flex justify-between items-center p-3 rounded-xl bg-white/70 border border-slate-100">
+                                <span class="text-xs text-slate-500 font-semibold">Yapı</span>
+                                <span class="text-sm font-bold text-emerald-700">4 Hiyerarşik Katman</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- CALCULATOR SECTION (REALISTIC SAHA SİMÜLATÖRÜ) -->
+        <section id="calculator" class="max-w-7xl mx-auto px-4 sm:px-8 py-16">
+            <div class="glass-panel rounded-3xl p-8 lg:p-12 border border-white/80 shadow-lg">
+                <div class="max-w-3xl mx-auto text-center mb-10">
+                    <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900">Gerçekçi Saha Hesaplama Simülatörü</h2>
+                    <p class="text-slate-600 mt-2">Arazinizin toprak yapısı, sulama yöntemi ve ürün türüne dayalı akademik saha parametreleriyle hesaplama yapın.</p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                    
+                    <!-- Sol Taraf: Giriş Parametreleri -->
+                    <div class="lg:col-span-6 space-y-6 bg-white/60 p-6 rounded-2xl border border-slate-200/60">
+                        <div>
+                            <div class="flex justify-between items-center mb-2">
+                                <label class="font-bold text-slate-700 text-sm">Arazi Büyüklüğü (Dönüm)</label>
+                                <span id="area-val" class="text-xl font-black text-emerald-600">50 Dönüm</span>
+                            </div>
+                            <input type="range" id="area-slider" min="1" max="500" value="50" class="w-full h-3 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-emerald-600">
+                        </div>
+
+                        <div>
+                            <label class="block font-bold text-slate-700 text-sm mb-2">Ürün Türü</label>
+                            <select id="crop-type" class="w-full p-3.5 rounded-xl border border-slate-200 bg-white font-semibold text-slate-700 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                                <option value="fruit" selected>Meyve Bahçesi (Ceviz, Elma, Zeytin vb. - ~700 m³/dönüm)</option>
+                                <option value="field">Tarla Mahsulleri (Mısır, Pamuk, Buğday - ~450 m³/dönüm)</option>
+                                <option value="greenhouse">Sera & Sebze Yetiştiriciliği (~900 m³/dönüm)</option>
+                                <option value="landscape">Çim & Peyzaj Alanları (~600 m³/dönüm)</option>
+                            </select>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block font-bold text-slate-700 text-sm mb-2">Toprak Türü</label>
+                                <select id="soil-type" class="w-full p-3.5 rounded-xl border border-slate-200 bg-white font-semibold text-slate-700 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                                    <option value="sandy">Kumlu (Suyu Tutmaz - Yüksek Etki)</option>
+                                    <option value="loam" selected>Tınlı (Dengeli Toprak)</option>
+                                    <option value="clay">Killi (Suyu Tutar - Orta Etki)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block font-bold text-slate-700 text-sm mb-2">Sulama Yöntemi</label>
+                                <select id="irrigation-type" class="w-full p-3.5 rounded-xl border border-slate-200 bg-white font-semibold text-slate-700 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                                    <option value="flood">Salma / Vahşi Sulama</option>
+                                    <option value="drip" selected>Damla Sulama Sistemleri</option>
+                                    <option value="sprinkler">Yağmurlama Sulama</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sağ Taraf: Çıktı ve Sonuçlar -->
+                    <div class="lg:col-span-6 space-y-4">
+                        <div class="p-6 rounded-2xl bg-gradient-to-br from-emerald-600 to-teal-700 text-white shadow-xl">
+                            <span class="text-xs uppercase tracking-wider font-semibold opacity-80">Tahmini Yıllık Su Tasarrufu</span>
+                            <div class="text-3xl sm:text-4xl font-black mt-1"><span id="out-water">0</span> m³</div>
+                            <span class="text-xs opacity-90 font-medium" id="out-water-percent">Saha koşullarında ortalama %0 tasarruf</span>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div class="p-5 rounded-2xl bg-white border border-slate-200/80 shadow-sm">
+                                <span class="text-xs uppercase tracking-wider font-semibold text-slate-400">Gübre Yıkanma Önleme</span>
+                                <div class="text-2xl font-black text-emerald-600 mt-1">%<span id="out-fertilizer">0</span></div>
+                                <span class="text-xs text-slate-500 font-medium">Besin maddelerinin sızmasını azaltır</span>
+                            </div>
+
+                            <div class="p-5 rounded-2xl bg-white border border-slate-200/80 shadow-sm">
+                                <span class="text-xs uppercase tracking-wider font-semibold text-slate-400">Tahmini Finansal Kazanç</span>
+                                <div class="text-2xl font-black text-slate-800 mt-1">₺<span id="out-cost">0</span> / yıl</div>
+                                <span class="text-xs text-slate-500 font-medium">Pompa/enerji & gübre tasarrufu</span>
+                            </div>
+                        </div>
+
+                        <div class="p-4 rounded-xl bg-emerald-50/80 border border-emerald-200 text-emerald-900 flex items-center justify-between text-xs font-semibold">
+                            <span>Uygulama İçin Gerekli FloraGel Miktarı:</span>
+                            <span class="text-emerald-700 font-bold text-sm" id="out-dosage">0 kg</span>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Akademik / Saha Uyarısı -->
+                <div class="mt-8 pt-6 border-t border-slate-200/60 text-center">
+                    <p class="text-xs text-slate-500 max-w-4xl mx-auto leading-relaxed">
+                        * Bu simülatördeki veriler, Ege Üniversitesi laboratuvar analizleri ile iklim, toprak yapısı ve ürün bazlı sulama standartları (FAO) dikkate alınarak modellenmiştir. Gerçek saha sonuçları yerel hava sıcaklığı, rüzgar ve toprak organik madde miktarına göre değişiklik gösterebilir.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ABOUT SECTION -->
+        <section id="about" class="max-w-7xl mx-auto px-4 sm:px-8 py-16">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <div>
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-emerald-100 text-emerald-800 font-bold text-xs mb-4">FloraGel Nedir?</div>
+                    <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 leading-tight mb-6">Tarımda Su İsrafına Biyo-Bozunur ve Bilimsel Çözüm</h2>
+                    <p class="text-slate-600 leading-relaxed mb-4">
+                        FloraGel, Yağız Efe Özkan ve Onur Duman tarafından kurulan bir tarım teknolojileri girişimidir. Kapsamlı Ar-Ge çalışmaları neticesinde geliştirdiğimiz hidrojel prototipi ile TEKNOFEST 2026 Tarım Teknolojileri yarışmasında finalistiz.
+                    </p>
+                    <p class="text-slate-600 leading-relaxed mb-6">
+                        Kuraklık stresi altındaki tarım arazilerinde sulama periyotlarını uzatarak enerji ve gübre kaybını azaltıyor, toprağın nem dengesini biyolojik yapısına zarar vermeden koruyoruz.
+                    </p>
+                </div>
+                <div class="relative">
+                    <div class="w-full rounded-3xl overflow-hidden border border-slate-200 shadow-xl bg-white p-2">
+                        <img src="FLORAGELBANNER.jpeg" alt="FloraGel Afiş" class="w-full h-auto rounded-2xl object-cover">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SUPPORTERS SECTION -->
+        <section id="supporters" class="max-w-7xl mx-auto px-4 sm:px-8 py-16">
+            <div class="text-center mb-10">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-emerald-100 text-emerald-800 font-bold text-xs mb-3">İş Ortakları & Kurumlar</div>
+                <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900">Destekçilerimiz & Paydaşlarımız</h2>
+                <p class="text-slate-600 mt-2">Ar-Ge ve saha süreçlerimizde bizlere güç veren kurumlar.</p>
+            </div>
+            
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-6">
+                <div class="glass-panel p-6 rounded-2xl flex flex-col items-center justify-center text-center border border-white/80 hover:border-emerald-500/50 transition-all shadow-sm">
+                    <i data-lucide="award" class="w-10 h-10 text-emerald-600 mb-3"></i>
+                    <span class="font-bold text-slate-800 text-base">TEKNOFEST 2026</span>
+                    <span class="text-xs text-slate-500 mt-1">Tarım Teknolojileri Finalisti</span>
+                </div>
+                <div class="glass-panel p-6 rounded-2xl flex flex-col items-center justify-center text-center border border-white/80 hover:border-emerald-500/50 transition-all shadow-sm">
+                    <i data-lucide="graduation-cap" class="w-10 h-10 text-emerald-600 mb-3"></i>
+                    <span class="font-bold text-slate-800 text-base">Ege Üniversitesi</span>
+                    <span class="text-xs text-slate-500 mt-1">Toprak Laboratuvarları Ar-Ge</span>
+                </div>
+                <div class="glass-panel p-6 rounded-2xl flex flex-col items-center justify-center text-center border border-white/80 hover:border-emerald-500/50 transition-all shadow-sm">
+                    <i data-lucide="building-2" class="w-10 h-10 text-emerald-600 mb-3"></i>
+                    <span class="font-bold text-slate-800 text-base">İZQ Girişimcilik</span>
+                    <span class="text-xs text-slate-500 mt-1">İnovasyon Destekçisi</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- FAQ SECTION -->
+        <section id="faq" class="max-w-4xl mx-auto px-4 sm:px-8 py-16">
+            <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 text-center mb-10">Sıkça Sorulan Sorular</h2>
+            <div class="space-y-4">
+                <details class="group glass-panel rounded-2xl p-6 border border-white/80 [&_summary::-webkit-details-marker]:hidden">
+                    <summary class="flex items-center justify-between cursor-pointer font-bold text-slate-800 text-lg">
+                        <span>Hidrojel bombası toprağa nasıl uygulanır?</span>
+                        <i data-lucide="chevron-down" class="w-5 h-5 text-slate-400 group-open:rotate-180 transition-transform"></i>
+                    </summary>
+                    <p class="text-slate-600 text-sm mt-4 leading-relaxed">
+                        Ekim veya dikim sırasında tohumun/fidanın hemen altına, kök derinliğine (20–60 cm) kuru olarak yerleştirilir. Çiftçinin mevcut ekim alışkanlıklarını değiştirmeden entegre edilir.
+                    </p>
+                </details>
+
+                <details class="group glass-panel rounded-2xl p-6 border border-white/80 [&_summary::-webkit-details-marker]:hidden">
+                    <summary class="flex items-center justify-between cursor-pointer font-bold text-slate-800 text-lg">
+                        <span>FloraGel toprağa veya çevreye zarar verir mi?</span>
+                        <i data-lucide="chevron-down" class="w-5 h-5 text-slate-400 group-open:rotate-180 transition-transform"></i>
+                    </summary>
+                    <p class="text-slate-600 text-sm mt-4 leading-relaxed">
+                        Hayır. FloraGel 8 ayrı doğal biyo-bileşenden hazırlanan nanokompozit bir yapıya sahiptir. Sentetik plastik kalıntı bırakmaz, toprak mikrobiyotasına uyumludur ve zamanla biyo-bozunmaya uğrar.
+                    </p>
+                </details>
+            </div>
+        </section>
+
+        <!-- CONTACT SECTION -->
+        <section id="contact" class="max-w-7xl mx-auto px-4 sm:px-8 py-16">
+            <div class="glass-panel rounded-3xl p-8 lg:p-12 border border-white/80">
+                <div class="max-w-3xl mx-auto text-center mb-12">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-emerald-100 text-emerald-800 font-bold text-xs mb-3">Bize Ulaşın</div>
+                    <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900">İletişim & Detaylı Bilgi</h2>
+                    <p class="text-slate-600 mt-2">Süreçlerimize dahil olmak, numune veya detaylı bilgi almak için bizimle iletişime geçin.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
+                    <div class="p-6 rounded-2xl bg-white/70 border border-slate-100 flex flex-col items-center text-center">
+                        <div class="w-12 h-12 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center mb-4">
+                            <i data-lucide="mail" class="w-6 h-6"></i>
+                        </div>
+                        <h3 class="font-bold text-slate-900 mb-1">E-Posta</h3>
+                        <p class="text-slate-600 text-sm">infofloragel@gmail.com</p>
+                    </div>
+
+                    <div class="p-6 rounded-2xl bg-white/70 border border-slate-100 flex flex-col items-center text-center">
+                        <div class="w-12 h-12 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center mb-4">
+                            <i data-lucide="award" class="w-6 h-6"></i>
+                        </div>
+                        <h3 class="font-bold text-slate-900 mb-1">TEKNOFEST Takım Adı</h3>
+                        <p class="text-slate-600 text-sm">FloraGel Tarım Teknolojileri</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- FOOTER -->
+        <footer class="border-t border-slate-200/80 bg-white/70 backdrop-blur-md py-10">
+            <div class="max-w-7xl mx-auto px-4 sm:px-8 flex flex-col md:flex-row justify-between items-center gap-6">
+                <div class="flex items-center gap-3">
+                    <img src="floragellogo.jpeg" alt="FloraGel Logo" class="h-8 w-auto object-contain">
+                </div>
+                <div class="text-slate-500 text-xs text-center">
+                    © 2026 FloraGel. Tüm hakları saklıdır. TEKNOFEST 2026 Tarım Teknolojileri Finalisti.
+                </div>
+            </div>
+        </footer>
+
+    </main>
+
+    <!-- 3D ENGINE & LOGIC -->
+    <script>
+        lucide.createIcons();
+
+        // --- 1. PARTICLE CANVAS ---
+        const pCanvas = document.getElementById('particleCanvas');
+        const pCtx = pCanvas.getContext('2d');
+        let particles = [];
+
+        function resizePCanvas() {
+            pCanvas.width = window.innerWidth;
+            pCanvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizePCanvas);
+        resizePCanvas();
+
+        for(let i=0; i<40; i++) {
+            particles.push({
+                x: Math.random() * window.innerWidth,
+                y: Math.random() * window.innerHeight,
+                r: Math.random() * 3 + 1,
+                dx: (Math.random() - 0.5) * 0.5,
+                dy: (Math.random() - 0.5) * 0.5
+            });
+        }
+
+        function drawParticles() {
+            pCtx.clearRect(0,0,pCanvas.width,pCanvas.height);
+            pCtx.fillStyle = '#10B981';
+            particles.forEach(p => {
+                p.x += p.dx; p.y += p.dy;
+                if(p.x<0||p.x>pCanvas.width) p.dx*=-1;
+                if(p.y<0||p.y>pCanvas.height) p.dy*=-1;
+                pCtx.beginPath();
+                pCtx.arc(p.x, p.y, p.r, 0, Math.PI*2);
+                pCtx.fill();
+            });
+            requestAnimationFrame(drawParticles);
+        }
+        drawParticles();
+
+        // --- 2. THREE.JS 3D HIDROJEL BOMBASI SIMÜLASYONU ---
+        const container = document.getElementById('three-canvas');
+        const scene = new THREE.Scene();
+
+        const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
+        camera.position.set(0, 0.8, 6.2);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(container.clientWidth, container.clientHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        container.appendChild(renderer.domElement);
+
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        controls.maxDistance = 12;
+        controls.minDistance = 3;
+        controls.target.set(0, 0, 0);
+
+        const ambientLight = new THREE.AmbientLight(0xffffff, 1.1);
+        scene.add(ambientLight);
+
+        const dirLight1 = new THREE.DirectionalLight(0xffffff, 1.5);
+        dirLight1.position.set(2, 6, 8);
+        scene.add(dirLight1);
+
+        const dirLight2 = new THREE.DirectionalLight(0xffffff, 0.5);
+        dirLight2.position.set(-5, -5, -5);
+        scene.add(dirLight2);
+
+        const layerData = {
+            1: {
+                title: "1. Tanik asit – demir filmi",
+                badge: "Dış Koruyucu Film",
+                desc: "Jeli güneş ve mikroorganizmalara karşı koruyan ince dış film.",
+                scale: 1.0,
+                color: 0x241b2f,
+                roughness: 0.2,
+                renderOrder: 1,
+                stats: ["Görev: UV & Mikroorganizma Kalkanı", "Konum: 1. Katman (Dış)"]
+            },
+            2: {
+                title: "2. Nanokil katmanı",
+                badge: "Yavaş Salınım Bariyeri",
+                desc: "Su ve besin salınımını yavaşlatan bariyer katman.",
+                scale: 0.85,
+                color: 0xa8a29e,
+                roughness: 0.4,
+                renderOrder: 2,
+                stats: ["Görev: Salınım Kontrolü", "Konum: 2. Katman"]
+            },
+            3: {
+                title: "3. PEC kabuğu",
+                badge: "Esnek Dayanım Kabuğu",
+                desc: "Jele mekanik dayanım veren esnek kabuk.",
+                scale: 0.70,
+                color: 0xd97706,
+                roughness: 0.3,
+                renderOrder: 3,
+                stats: ["Görev: Mekanik Mukavemet", "Konum: 3. Katman"]
+            },
+            4: {
+                title: "4. Çekirdek",
+                badge: "Merkez Depo",
+                desc: "Suyun ve besinlerin depolandığı, köke yavaşça verildiği iç kısım.",
+                scale: 0.50,
+                color: 0xfef3c7,
+                roughness: 0.5,
+                renderOrder: 4,
+                stats: ["Görev: Su & Besin Depolama", "Konum: 4. Katman (İç)"]
+            }
+        };
+
+        function createMushroomProfile(scale) {
+            const points = [];
+            points.push(new THREE.Vector2(0, -1.1 * scale));
+            points.push(new THREE.Vector2(0.35 * scale, -1.08 * scale));
+            points.push(new THREE.Vector2(0.42 * scale, -0.65 * scale));
+            points.push(new THREE.Vector2(0.55 * scale, -0.35 * scale));
+            points.push(new THREE.Vector2(1.20 * scale, -0.15 * scale)); 
+            points.push(new THREE.Vector2(1.45 * scale, 0.10 * scale));
+            points.push(new THREE.Vector2(1.35 * scale, 0.70 * scale));
+            points.push(new THREE.Vector2(0.85 * scale, 1.25 * scale));
+            points.push(new THREE.Vector2(0, 1.40 * scale));
+
+            const geometry = new THREE.LatheGeometry(points, 64, Math.PI * 0.2, Math.PI * 1.6);
+            geometry.center();
+            return geometry;
+        }
+
+        const layers = {};
+        const layerGroup = new THREE.Group();
+        scene.add(layerGroup);
+
+        Object.keys(layerData).forEach(key => {
+            const data = layerData[key];
+            const geo = createMushroomProfile(data.scale);
+            const mat = new THREE.MeshStandardMaterial({
+                color: data.color,
+                side: THREE.DoubleSide,
+                roughness: data.roughness,
+                metalness: 0.1,
+                transparent: true,
+                opacity: 1.0,
+                depthWrite: true,
+                emissive: new THREE.Color(0x000000),
+                emissiveIntensity: 0
+            });
+            const mesh = new THREE.Mesh(geo, mat);
+            mesh.renderOrder = data.renderOrder;
+            layerGroup.add(mesh);
+            layers[key] = mesh;
+        });
+
+        layerGroup.rotation.x = 0.2;
+        layerGroup.rotation.y = 0; // Kesit tam karşıya bakıyor
+
+        let isTransitioning = false;
+
+        function animate() {
+            requestAnimationFrame(animate);
+            if (controls.state === -1) {
+                layerGroup.rotation.y += 0.0015;
+            }
+            controls.update();
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        function selectLayer(id) {
+            if (isTransitioning) return;
+            isTransitioning = true;
+
+            document.querySelectorAll('.glass-btn').forEach(btn => btn.classList.remove('active'));
+            const targetBtn = document.getElementById(id === 'all' ? 'btn-all' : `btn-${id}`);
+            if(targetBtn) targetBtn.classList.add('active');
+
+            gsap.to(camera.position, { x: 0, y: 0.8, z: 6.2, duration: 0.8, ease: "power3.out" });
+
+            if (id === 'all') {
+                Object.keys(layers).forEach(k => {
+                    const mat = layers[k].material;
+                    mat.depthWrite = true;
+                    gsap.to(mat, { opacity: 1.0, duration: 0.5 });
+                    gsap.to(mat.emissive, { r: 0, g: 0, b: 0, duration: 0.5 });
+                });
+
+                document.getElementById('layer-badge').innerText = "Tüm Yapı";
+                document.getElementById('layer-title').innerText = "Hidrojel Bombası";
+                document.getElementById('layer-desc').innerText = "Dört katmanlı hiyerarşik bio-nanokompozit yapı. Katmanlar sırasıyla koruma, salınım hızı dengeleme, mekanik dayanım ve yüksek su/besin depolama görevlerini üstlenir.";
+                document.getElementById('layer-stats').innerHTML = `
+                    <div class="flex justify-between items-center p-3 rounded-xl bg-white/70 border border-slate-100">
+                        <span class="text-xs text-slate-500 font-semibold">Ort. Su Tasarrufu</span>
+                        <span class="text-sm font-bold text-emerald-700">%30 - %45</span>
+                    </div>
+                    <div class="flex justify-between items-center p-3 rounded-xl bg-white/70 border border-slate-100">
+                        <span class="text-xs text-slate-500 font-semibold">Gübre Yıkanma Önleme</span>
+                        <span class="text-sm font-bold text-emerald-700">%20 - %30</span>
+                    </div>
+                    <div class="flex justify-between items-center p-3 rounded-xl bg-white/70 border border-slate-100">
+                        <span class="text-xs text-slate-500 font-semibold">Yapı</span>
+                        <span class="text-sm font-bold text-emerald-700">4 Hiyerarşik Katman</span>
+                    </div>
+                `;
+            } else {
+                const target = layerData[id];
+                const selectedKey = parseInt(id);
+
+                Object.keys(layers).forEach(k => {
+                    const keyNum = parseInt(k);
+                    const mat = layers[k].material;
+                    
+                    if (keyNum === selectedKey) {
+                        mat.depthWrite = true;
+                        gsap.to(mat, { opacity: 1.0, duration: 0.5 });
+                        const glowColor = new THREE.Color(target.color);
+                        gsap.to(mat.emissive, { 
+                            r: Math.min(glowColor.r * 0.8 + 0.2, 1), 
+                            g: Math.min(glowColor.g * 0.8 + 0.2, 1), 
+                            b: Math.min(glowColor.b * 0.8 + 0.2, 1), 
+                            duration: 0.5 
+                        });
+                    } else {
+                        mat.depthWrite = false;
+                        gsap.to(mat, { opacity: 0.18, duration: 0.5 });
+                        gsap.to(mat.emissive, { r: 0, g: 0, b: 0, duration: 0.5 });
+                    }
+                });
+
+                document.getElementById('layer-badge').innerText = target.badge;
+                document.getElementById('layer-title').innerText = target.title;
+                document.getElementById('layer-desc').innerText = target.desc;
+                document.getElementById('layer-stats').innerHTML = target.stats.map(s => {
+                    const [k, v] = s.split(': ');
+                    return `
+                        <div class="flex justify-between items-center p-3 rounded-xl bg-white/70 border border-slate-100">
+                            <span class="text-xs text-slate-500 font-semibold">${k}</span>
+                            <span class="text-sm font-bold text-emerald-700">${v}</span>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            setTimeout(() => { isTransitioning = false; }, 500);
+        }
+
+        window.addEventListener('resize', () => {
+            camera.aspect = container.clientWidth / container.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(container.clientWidth, container.clientHeight);
+        });
+
+        // --- 3. GERÇEKÇİ HESAPLAMA SİMÜLATÖRÜ MANTIĞI ---
+        const areaSlider = document.getElementById('area-slider');
+        const areaVal = document.getElementById('area-val');
+        const cropSelect = document.getElementById('crop-type');
+        const soilSelect = document.getElementById('soil-type');
+        const irrSelect = document.getElementById('irrigation-type');
+
+        // Dönüm başı ortalama yıllık su tüketimi (m³/dönüm)
+        const cropWaterMap = {
+            fruit: 700,
+            field: 450,
+            greenhouse: 900,
+            landscape: 600
+        };
+
+        // Toprak türünün tasarruf verimliliği çarpanı
+        const soilFactorMap = {
+            sandy: 1.25, // Kumlu toprakta su kaybı yüksek olduğu için hidrojel etkisi tavan yapar
+            loam: 1.00,  // Standart tınlı toprak
+            clay: 0.80   // Killi toprak zaten su tuttuğundan etki nispeten düşüktür
+        };
+
+        // Sulama yönteminin tasarruf potansiyeli çarpanı
+        const irrFactorMap = {
+            flood: 1.20,    // Salma sulamada buharlaşma/sızma çok yüksek, tasarruf etkisi fazla
+            drip: 0.90,     // Damla sulama zaten verimli
+            sprinkler: 1.05 // Yağmurlama orta düzey
+        };
+
+        function calculateRealistics() {
+            const area = parseInt(areaSlider.value);
+            const crop = cropSelect.value;
+            const soil = soilSelect.value;
+            const irr = irrSelect.value;
+
+            areaVal.innerText = `${area} Dönüm`;
+
+            // Temel Su İhtiyacı
+            const baseWaterPerDonum = cropWaterMap[crop];
+            const totalWaterRequirement = area * baseWaterPerDonum;
+
+            // Gerçekçi Tasarruf Oranı Hesabı (Baz Oran %35)
+            let baseSavingsRate = 0.35; 
+            let finalSavingsRate = baseSavingsRate * soilFactorMap[soil] * irrFactorMap[irr];
+            
+            // Gerçekçi Sınırlandırma (Maksimum %48, Minimum %22)
+            finalSavingsRate = Math.min(Math.max(finalSavingsRate, 0.22), 0.48);
+
+            const savedWater = Math.round(totalWaterRequirement * finalSavingsRate);
+            const savingsPercentText = Math.round(finalSavingsRate * 100);
+
+            // Gübre Tasarrufu Hesabı (Baz %25 civarı)
+            const fertilizerSavings = Math.round(22 * soilFactorMap[soil]);
+
+            // Finansal Kazanç Hesabı: m³ su çekme enerji/pompa maliyeti (~₺18/m³) + Gübre Tasarruf Tutarı (~₺350/dönüm)
+            const energySavingsTL = savedWater * 18;
+            const fertilizerSavingsTL = area * 350 * (fertilizerSavings / 25);
+            const totalCostSavings = Math.round(energySavingsTL + fertilizerSavingsTL);
+
+            // Gerekli Ürün Dozajı (Ortalama dönüm başı 2.5 kg)
+            const requiredDosageKg = Math.round(area * 2.5);
+
+            // DOM Güncellemeleri
+            document.getElementById('out-water').innerText = savedWater.toLocaleString('tr-TR');
+            document.getElementById('out-water-percent').innerText = `Seçilen saha parametrelerinde ortalama %${savingsPercentText} tasarruf`;
+            document.getElementById('out-fertilizer').innerText = fertilizerSavings;
+            document.getElementById('out-cost').innerText = totalCostSavings.toLocaleString('tr-TR');
+            document.getElementById('out-dosage').innerText = `${requiredDosageKg.toLocaleString('tr-TR')} kg FloraGel`;
+        }
+
+        areaSlider.addEventListener('input', calculateRealistics);
+        cropSelect.addEventListener('change', calculateRealistics);
+        soilSelect.addEventListener('change', calculateRealistics);
+        irrSelect.addEventListener('change', calculateRealistics);
+
+        // İlk Yükleme Hesaplaması
+        calculateRealistics();
+    </script>
+
+    <!-- CHATBOT WIDGET START -->
+    <div id="chat-widget" class="fixed bottom-6 right-6 z-50 flex flex-col items-end font-sans">
+        <div id="chat-box" class="hidden w-[350px] sm:w-[380px] h-[500px] bg-white/95 backdrop-blur-xl border border-slate-200/80 rounded-3xl shadow-2xl flex-col overflow-hidden mb-4 transition-all duration-300">
+            <div class="bg-gradient-to-r from-emerald-600 to-teal-600 p-4 text-white flex items-center justify-between shadow-md">
+                <div class="flex items-center gap-3">
+                    <img src="floragellogo.jpeg" alt="Logo" class="w-8 h-8 rounded-full bg-white p-0.5 object-contain">
+                    <div>
+                        <h4 class="font-bold text-sm leading-tight">FloraGel Asistanı</h4>
+                        <span class="text-[11px] text-emerald-100 flex items-center gap-1">
+                            <span class="w-2 h-2 rounded-full bg-emerald-300 animate-pulse"></span> Çevrimiçi
+                        </span>
+                    </div>
+                </div>
+                <button onclick="toggleChat()" class="text-white/80 hover:text-white p-1 rounded-lg hover:bg-white/10 transition-colors">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <div id="chat-messages" class="flex-1 p-4 overflow-y-auto space-y-3 text-sm">
+                <div class="flex items-start gap-2.5">
+                    <div class="w-7 h-7 rounded-full bg-emerald-100 flex items-center justify-center text-xs font-bold text-emerald-700 shrink-0">FG</div>
+                    <div class="bg-slate-100 text-slate-800 p-3 rounded-2xl rounded-tl-none max-w-[80%] text-xs leading-relaxed">
+                        Merhaba! Ben FloraGel akıllı asistanıyım. 4 katmanlı biyopolimer yapımız, saha simülasyonlarımız veya uygulama dozajları hakkında sorularınızı yanıtlayabilirim.
+                    </div>
+                </div>
+            </div>
+
+            <form onsubmit="handleChatSubmit(event)" class="p-3 border-t border-slate-100 bg-white/50 flex gap-2">
+                <input type="text" id="chat-input" placeholder="Bir soru sorun..." class="flex-1 bg-slate-100 text-slate-800 text-xs rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-emerald-500/50">
+                <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white p-2.5 rounded-xl transition-all shadow-md active:scale-95">
+                    <i data-lucide="send" class="w-4 h-4"></i>
+                </button>
+            </form>
+        </div>
+
+        <button onclick="toggleChat()" class="w-14 h-14 bg-emerald-600 hover:bg-emerald-500 text-white rounded-full shadow-2xl flex items-center justify-center transition-all hover:scale-110 active:scale-95 group p-2">
+            <img src="floragellogo.jpeg" alt="Logo" class="w-full h-full object-contain rounded-full bg-white p-1">
+        </button>
+    </div>
+
+    <script>
+        function toggleChat() {
+            const chatBox = document.getElementById('chat-box');
+            if (chatBox.classList.contains('hidden')) {
+                chatBox.classList.remove('hidden');
+                chatBox.classList.add('flex');
+            } else {
+                chatBox.classList.add('hidden');
+                chatBox.classList.remove('flex');
+            }
+        }
+
+        function handleChatSubmit(e) {
+            e.preventDefault();
+            const input = document.getElementById('chat-input');
+            const query = input.value.trim();
+            if (!query) return;
+
+            const messagesContainer = document.getElementById('chat-messages');
+
+            const userDiv = document.createElement('div');
+            userDiv.className = 'flex items-start gap-2.5 justify-end';
+            userDiv.innerHTML = `
+                <div class="bg-emerald-600 text-white p-3 rounded-2xl rounded-tr-none max-w-[80%] text-xs leading-relaxed shadow-sm">
+                    ${escapeHtml(query)}
+                </div>
+            `;
+            messagesContainer.appendChild(userDiv);
+            input.value = '';
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+            const aiDiv = document.createElement('div');
+            aiDiv.className = 'flex items-start gap-2.5';
+            aiDiv.id = 'temp-loading';
+            aiDiv.innerHTML = `
+                <div class="w-7 h-7 rounded-full bg-emerald-100 flex items-center justify-center text-xs font-bold text-emerald-700 shrink-0">FG</div>
+                <div class="bg-slate-100 text-slate-800 p-3 rounded-2xl rounded-tl-none max-w-[80%] text-xs leading-relaxed italic text-slate-400">
+                    Yazıyor...
+                </div>
+            `;
+            messagesContainer.appendChild(aiDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+            setTimeout(() => {
+                document.getElementById('temp-loading').remove();
+                
+                const finalAiDiv = document.createElement('div');
+                finalAiDiv.className = 'flex items-start gap-2.5';
+                finalAiDiv.innerHTML = `
+                    <div class="w-7 h-7 rounded-full bg-emerald-100 flex items-center justify-center text-xs font-bold text-emerald-700 shrink-0">FG</div>
+                    <div class="bg-slate-100 text-slate-800 p-3 rounded-2xl rounded-tl-none max-w-[80%] text-xs leading-relaxed">
+                        Detaylı bilgi ve numune talepleriniz için bize <b>infofloragel@gmail.com</b> adresimizden ulaşabilirsiniz.
+                    </div>
+                `;
+                messagesContainer.appendChild(finalAiDiv);
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                if(window.lucide) lucide.createIcons();
+            }, 500);
+        }
+
+        function escapeHtml(text) {
+            return text.replace(/[&<>"']/g, function(m) {
+                return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
+            });
+        }
+    </script>
+    <!-- CHATBOT WIDGET END -->
+</body>
+</html>
